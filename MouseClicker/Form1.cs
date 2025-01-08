@@ -63,9 +63,9 @@ namespace MouseClicker
         {
             if (!clicking)
             {
-                // 開始連點
+                // 開始連點，連點間隔為 30 毫秒
                 clicking = true;
-                clickThread = new Thread(() => ClickMouse(Cursor.Position.X, Cursor.Position.Y, 10));
+                clickThread = new Thread(() => ClickMouse(Cursor.Position.X, Cursor.Position.Y, 30));
                 clickThread.Start();
                 btnStartStop2.Text = "連點中";
             }
