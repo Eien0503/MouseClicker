@@ -51,21 +51,49 @@ namespace MouseClicker
             InitializeComponent();
             // 設定全局鍵盤鉤子
             _hookID = SetHook(_proc);
-            // 設定快捷鍵
-            //this.KeyPreview = true;
-            //this.KeyDown += new KeyEventHandler(Form1_KeyDown);
+
+            // 初始化 NumericUpDown 控制項
+            numInterval.Minimum = 10;
+            numInterval.Maximum = 100;
+            numInterval.Value = Properties.Settings.Default.Interval; // 從設定中讀取預設值
+
+            // 初始化 CheckBox 控制項
+            chkRememberInterval.Checked = Properties.Settings.Default.RememberInterval;
+            chkRememberInterval.CheckedChanged += ChkRememberInterval_CheckedChanged;
         }
+
+        private void ChkRememberInterval_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkRememberInterval.Checked)
+            {
+                // 記憶當前間隔時間
+                Properties.Settings.Default.Interval = (int)numInterval.Value;
+                Properties.Settings.Default.RememberInterval = true;
+                Properties.Settings.Default.Save();
+            }
+            else
+            {
+                // 恢復預設值
+                numInterval.Value = 30;
+                Properties.Settings.Default.Interval = 30;
+                Properties.Settings.Default.RememberInterval = false;
+                Properties.Settings.Default.Save();
+            }
+        }
+
         private void btnStartStop2_Click(object sender, EventArgs e)
         {
             
         }
+
         private void ToggleClicking()
         {
             if (!clicking)
             {
-                // 開始連點，連點間隔為 30 毫秒
+                // 開始連點，使用 numInterval 的值作為間隔
                 clicking = true;
-                clickThread = new Thread(() => ClickMouse(Cursor.Position.X, Cursor.Position.Y, 30));
+                int interval = (int)numInterval.Value;
+                clickThread = new Thread(() => ClickMouse(Cursor.Position.X, Cursor.Position.Y, interval));
                 clickThread.Start();
                 btnStartStop2.Text = "連點中";
             }
@@ -80,6 +108,7 @@ namespace MouseClicker
                 btnStartStop2.Text = "停止中";
             }
         }
+
         private void ClickMouse(int x, int y, int interval)
         {
             // 設定滑鼠位置
@@ -95,6 +124,7 @@ namespace MouseClicker
                 Thread.Sleep(interval);
             }
         }
+
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
         {
             using (var curProcess = System.Diagnostics.Process.GetCurrentProcess())
@@ -117,6 +147,7 @@ namespace MouseClicker
             }
             return CallNextHookEx(_hookID, nCode, wParam, lParam);
         }
+
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             // 釋放全局鍵盤鉤子
@@ -129,6 +160,7 @@ namespace MouseClicker
             }
             base.OnFormClosed(e);
         }
+
         private void Form1_Load(object sender, EventArgs e)
         {
 
