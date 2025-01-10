@@ -52,14 +52,26 @@ namespace MouseClicker
             // 設定全局鍵盤鉤子
             _hookID = SetHook(_proc);
 
-            // 初始化 NumericUpDown 控制項
-            numInterval.Minimum = 10;
-            numInterval.Maximum = 100;
-            numInterval.Value = Properties.Settings.Default.Interval; // 從設定中讀取預設值
+            // 訂閱 Form1_Load 事件
+            this.Load += new EventHandler(Form1_Load);
 
             // 初始化 CheckBox 控制項
             chkRememberInterval.Checked = Properties.Settings.Default.RememberInterval;
             chkRememberInterval.CheckedChanged += ChkRememberInterval_CheckedChanged;
+
+            // 初始化 NumericUpDown 控制項
+            numInterval.Minimum = 10;
+            numInterval.Maximum = 100;
+            numInterval.Value = Properties.Settings.Default.Interval; // 從設定中讀取預設值
+            numInterval.ValueChanged += NumInterval_ValueChanged;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            // 初始化 NumericUpDown 控制項
+            numInterval.Minimum = 10;
+            numInterval.Maximum = 100;
+            numInterval.Value = Properties.Settings.Default.Interval; // 從設定中讀取預設值
         }
 
         private void ChkRememberInterval_CheckedChanged(object sender, EventArgs e)
@@ -77,6 +89,16 @@ namespace MouseClicker
                 numInterval.Value = 30;
                 Properties.Settings.Default.Interval = 30;
                 Properties.Settings.Default.RememberInterval = false;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void NumInterval_ValueChanged(object sender, EventArgs e)
+        {
+            if (chkRememberInterval.Checked)
+            {
+                // 記憶當前間隔時間
+                Properties.Settings.Default.Interval = (int)numInterval.Value;
                 Properties.Settings.Default.Save();
             }
         }
@@ -159,11 +181,6 @@ namespace MouseClicker
                 clickThread.Join();
             }
             base.OnFormClosed(e);
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }
